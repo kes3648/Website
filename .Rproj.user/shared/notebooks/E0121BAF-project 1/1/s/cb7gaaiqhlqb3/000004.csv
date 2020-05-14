@@ -1,0 +1,2 @@
+"0","#2"
+"0","Combined2%>%filter(Unemploy_Rate>5)%>%summarize_if(is.numeric,mean)"

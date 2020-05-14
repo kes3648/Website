@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Kristen Shaver" />
+    <meta name="description" content="Describe your website">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>Exploratory Data Analysis</title>
+    <meta name="generator" content="Hugo 0.70.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/blog/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="resume.pdf">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/project1/">Exploratory Data Analysis</a></strong>
+          </h3>
+        </div>
+        <div class="blog-title">
+          <h4>
+          January 1, 0001
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>The first data set chosen was “GDP”. This data set contains information on the Gross Domestic Product (in billions) for the United States by quarter since 1947. The second data set chosen was “Unemployment”. This data set contains information on the unemployment rate (percentage) in the United States by year since 1948. The third data set chosen was “Presidents”. This data set contains a list of United States preisdent by year since 1947. The final data set chosen was “Income”. This data set contains information on the per capita income (in US dollars) in the United States since 1929. These data sets were obtained by searching on the “Dataset Search” feature on Google. I chose these data sets because I felt that they were all tied into the United States economy. I expect there to be a direct correlation between unemployment rate and per capita income and GDP. I also expect there to be smaller trends for GDP, unemployment rate, and per capita income within different presidencies.</p>
+<pre class="r"><code>library(dplyr)
+library(tidyverse)
+GDP &lt;- read.csv(&quot;GDP.csv&quot;) %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 292
+## Columns: 2
+## $ Date         &lt;fct&gt; 1947-01-01, 1947-04-01, 1947-07-01, 1947-10-01, 1948-0...
+## $ GDP_billions &lt;dbl&gt; 243.164, 245.968, 249.585, 259.745, 265.742, 272.567, ...</code></pre>
+<pre class="r"><code>Unemployment &lt;- read.csv(&quot;Unemployment.csv&quot;) %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 73
+## Columns: 2
+## $ Date &lt;int&gt; 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 20...
+## $ Rate &lt;dbl&gt; 3.6, 4.0, 4.1, 4.7, 4.9, 5.7, 6.6, 8.0, 8.3, 9.1, 9.8, 7.8, 5....</code></pre>
+<pre class="r"><code>Presidents &lt;- read.csv(&quot;Presidents.csv&quot;) %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 74
+## Columns: 2
+## $ Year      &lt;int&gt; 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 201...
+## $ President &lt;fct&gt; Trump, Trump, Trump, Trump, Obama, Obama, Obama, Obama, O...</code></pre>
+<pre class="r"><code>Income &lt;- read.csv(&quot;Income.csv&quot;) %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 91
+## Columns: 2
+## $ Date              &lt;fct&gt; 1929-01-01, 1930-01-01, 1931-01-01, 1932-01-01, 1...
+## $ per_capita_income &lt;int&gt; 700, 621, 529, 403, 376, 428, 478, 540, 579, 532,...</code></pre>
+</div>
+<div id="tidying-rearranging-widelong" class="section level2">
+<h2>Tidying: Rearranging Wide/Long</h2>
+<p>These data sets were already tidy, so I decided to untidy and re-tidy them. First, I wanted to combine two of the datasets, GDP and Income, so I altered their Date variables to only include their year (to match the other two data sets). GDP included a GDP value per quarter, so each year had 4 GDP values. I decided to change this into an average yearly GDP, so I used the summarize() function to convert to an average yearly GDP. I then joined these two data sets into “GDPIncome1”. After this, I altered the other two data sets, Presidents and Unemployment. In the Presidents data set, the Year variable was a numeric variable, so I changed it to be a character variable. In Unemployment, the Date and Rate varaibles were renamed to “Year” and “Unemploy_Rate” in order to match the other data sets and to be more descriptive. Finally, I was ready to un-tidy my data sets, so I used pivot_longer() on GDPIncome1. This took both of the monetary variables, avgGDP_billions and per_capita_income, and put them in one column, and their numeric values in another column by year. After that, I joined this un-tidy data set to my other two data sets, Presidents and Unemployment (explanation on joining in next section), into “Combined”. I next decided to re-tidy this combined data set, so I used pivot_wider() to separate out the average GDP values from the per capita income values into their own columns.</p>
+<pre class="r"><code>GDP1 &lt;- GDP %&gt;% separate(Date, 4, into = c(&quot;Year&quot;)) %&gt;% group_by(Year) %&gt;% 
+    summarize(avgGDP_billions = mean(GDP_billions))
+Income1 &lt;- Income %&gt;% separate(Date, 4, into = c(&quot;Year&quot;))
+GDPIncome1 &lt;- GDP1 %&gt;% full_join(Income1)
+
+Presidents &lt;- Presidents %&gt;% mutate(Year = as.character(Year))
+Unemployment &lt;- Unemployment %&gt;% rename(Year = &quot;Date&quot;) %&gt;% mutate(Year = as.character(Year)) %&gt;% 
+    rename(Unemploy_Rate = &quot;Rate&quot;)
+
+Combined &lt;- GDPIncome1 %&gt;% pivot_longer(cols = (2:3)) %&gt;% inner_join(Presidents) %&gt;% 
+    inner_join(Unemployment)
+Combined1 &lt;- Combined %&gt;% pivot_wider(names_from = &quot;name&quot;, values_from = &quot;value&quot;) %&gt;% 
+    mutate(avgGDP = avgGDP_billions * 1e+09) %&gt;% select(cols = -c(4))</code></pre>
+</div>
+<div id="joiningmerging" class="section level2">
+<h2>Joining/Merging</h2>
+<p>I used inner_join() to join my data sets because I had extra observations in some of my data sets that didn’t correspond to observations in the other data sets and I didn’t want to include NAs in my combined data set. The only cases that were dropped were from years that extended beyond the year range of the other data sets. I do not expect any problems with this.</p>
+<pre class="r"><code>Combined &lt;- GDPIncome1 %&gt;% pivot_longer(cols = (2:3)) %&gt;% inner_join(Presidents) %&gt;% 
+    inner_join(Unemployment)
+Combined2 &lt;- Combined %&gt;% pivot_wider(names_from = &quot;name&quot;, values_from = &quot;value&quot;) %&gt;% 
+    mutate(avgGDP = avgGDP_billions * 1e+09) %&gt;% select(cols = -c(4))</code></pre>
+</div>
+<div id="wrangling" class="section level2">
+<h2>Wrangling</h2>
+<ol style="list-style-type: decimal">
+<li>It was found that Eisenhower was in the lowest percentile for unemployment rate in 1953, meaning that during this year he had the lowest unemployment rate compared to the other presidents throughout the years. (2) For observations with unemployment rate over 5, the mean unemployment rate was 6.657778, the mean per capita income was 18600.73, and the mean GDP was 6202519061111. (3) The overall standard deviation of unemployment rate was 1.604746, 16736.13 for per capita income, and 6331037392727 for average GDP. (4) In the data set, there were 72 different years, 13 different presidents, 39 different unemployment rate values, 72 different per capita income values, and 72 different average GDP values. (5) The minimum value was 2.9 for unemployment rate, 1415 for per capita income, and 272475250000 for average GDP. (6) The maximum value was 10.4 for unemployment rate, 56621 for per capita income, and 21427103250000 for GDP. (7) The two numeric variables with the highest correlation are avergae GDP and per capita income.</li>
+</ol>
+<pre class="r"><code># 1
+Combined2 %&gt;% mutate(Unemploy_pctile = ntile(Unemploy_Rate, 100)) %&gt;% 
+    arrange(Unemploy_pctile)</code></pre>
+<pre><code>## # A tibble: 72 x 6
+##    Year  President  Unemploy_Rate per_capita_income  avgGDP Unemploy_pctile
+##    &lt;chr&gt; &lt;fct&gt;              &lt;dbl&gt;             &lt;dbl&gt;   &lt;dbl&gt;           &lt;int&gt;
+##  1 1953  Eisenhower           2.9              1875 3.89e11               1
+##  2 1952  Truman               3.2              1800 3.67e11               2
+##  3 1948  Truman               3.4              1456 2.74e11               3
+##  4 1969  Nixon                3.4              3948 1.02e12               5
+##  5 1951  Truman               3.7              1713 3.47e11               6
+##  6 1968  LBJ                  3.7              3641 9.41e11               7
+##  7 1967  LBJ                  3.9              3350 8.60e11               9
+##  8 1970  Nixon                3.9              4218 1.07e12              10
+##  9 1956  Eisenhower           4                2068 4.49e11              12
+## 10 1966  LBJ                  4                3155 8.13e11              13
+## # ... with 62 more rows</code></pre>
+<pre class="r"><code># 2
+Combined2 %&gt;% filter(Unemploy_Rate &gt; 5) %&gt;% summarize_if(is.numeric, 
+    mean)</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   Unemploy_Rate per_capita_income  avgGDP
+##           &lt;dbl&gt;             &lt;dbl&gt;   &lt;dbl&gt;
+## 1          6.66            18601. 6.20e12</code></pre>
+<pre class="r"><code># 3
+Combined2 %&gt;% summarize_if(is.numeric, sd)</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   Unemploy_Rate per_capita_income  avgGDP
+##           &lt;dbl&gt;             &lt;dbl&gt;   &lt;dbl&gt;
+## 1          1.60            16736. 6.33e12</code></pre>
+<pre class="r"><code># 4
+Combined2 %&gt;% summarize_all(n_distinct)</code></pre>
+<pre><code>## # A tibble: 1 x 5
+##    Year President Unemploy_Rate per_capita_income avgGDP
+##   &lt;int&gt;     &lt;int&gt;         &lt;int&gt;             &lt;int&gt;  &lt;int&gt;
+## 1    72        13            39                72     72</code></pre>
+<pre class="r"><code># 5
+Combined2 %&gt;% summarize_if(is.numeric, min)</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   Unemploy_Rate per_capita_income        avgGDP
+##           &lt;dbl&gt;             &lt;dbl&gt;         &lt;dbl&gt;
+## 1           2.9              1415 272475250000.</code></pre>
+<pre class="r"><code># 6
+Combined2 %&gt;% summarize_if(is.numeric, max)</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   Unemploy_Rate per_capita_income  avgGDP
+##           &lt;dbl&gt;             &lt;dbl&gt;   &lt;dbl&gt;
+## 1          10.4             56621 2.14e13</code></pre>
+<pre class="r"><code># 7
+Combined2 %&gt;% select_if(is.numeric) %&gt;% cor</code></pre>
+<pre><code>##                   Unemploy_Rate per_capita_income    avgGDP
+## Unemploy_Rate         1.0000000         0.1622467 0.1415209
+## per_capita_income     0.1622467         1.0000000 0.9975972
+## avgGDP                0.1415209         0.9975972 1.0000000</code></pre>
+<ol start="8" style="list-style-type: decimal">
+<li>The mean unemployment rate per President was calculated. Reagan was found to have the highest mean unemployment rate, and Truman had the lowest mean unemployment rate. (9) The per capita income variable was converted into a categorical variable by configuring three categories, high, medium, and low, and assiging each observation to one of these categories. The mean per capita income for the high level income category was 41813.10, 15860.96 for medium level income, and 2620.36 for the low income level. (10) Trump had the highest average GDP of the high level income category. Nixon had the highest average GDP of the low level income category. Clinton had the highest average GDP of the medium level income category.</li>
+</ol>
+<pre class="r"><code># 8
+Combined2 %&gt;% group_by(President) %&gt;% summarize(mean(Unemploy_Rate))</code></pre>
+<pre><code>## # A tibble: 13 x 2
+##    President  `mean(Unemploy_Rate)`
+##    &lt;fct&gt;                      &lt;dbl&gt;
+##  1 Carter                      6.52
+##  2 Clinton                     5.41
+##  3 Eisenhower                  4.74
+##  4 Ford                        7.03
+##  5 GHW_Bush                    6.12
+##  6 GW_Bush                     5.12
+##  7 JFK                         6.20
+##  8 LBJ                         4.62
+##  9 Nixon                       4.78
+## 10 Obama                       7.52
+## 11 Reagan                      7.6 
+## 12 Truman                      4.22
+## 13 Trump                       4.27</code></pre>
+<pre class="r"><code># 9
+Combined2 %&gt;% mutate(PCincome_cat = case_when(per_capita_income &gt; 
+    30000 ~ &quot;high&quot;, 5000 &lt;= per_capita_income &amp; per_capita_income &lt;= 
+    30000 ~ &quot;med&quot;, per_capita_income &lt; 5000 ~ &quot;low&quot;)) %&gt;% group_by(PCincome_cat) %&gt;% 
+    summarize(mean(per_capita_income))</code></pre>
+<pre><code>## # A tibble: 3 x 2
+##   PCincome_cat `mean(per_capita_income)`
+##   &lt;chr&gt;                            &lt;dbl&gt;
+## 1 high                            41813.
+## 2 low                              2620.
+## 3 med                             15861.</code></pre>
+<pre class="r"><code>Combined3 &lt;- Combined2 %&gt;% mutate(PCincome_cat = case_when(per_capita_income &gt; 
+    30000 ~ &quot;high&quot;, 5000 &lt;= per_capita_income &amp; per_capita_income &lt;= 
+    30000 ~ &quot;med&quot;, per_capita_income &lt; 5000 ~ &quot;low&quot;))
+# 10
+Combined3 %&gt;% group_by(PCincome_cat, President) %&gt;% summarize(mean(avgGDP))</code></pre>
+<pre><code>## # A tibble: 15 x 3
+## # Groups:   PCincome_cat [3]
+##    PCincome_cat President  `mean(avgGDP)`
+##    &lt;chr&gt;        &lt;fct&gt;               &lt;dbl&gt;
+##  1 high         Clinton           1.03e13
+##  2 high         GW_Bush           1.27e13
+##  3 high         Obama             1.66e13
+##  4 high         Trump             2.05e13
+##  5 low          Eisenhower        4.59e11
+##  6 low          JFK               5.83e11
+##  7 low          LBJ               7.80e11
+##  8 low          Nixon             1.13e12
+##  9 low          Truman            3.12e11
+## 10 med          Carter            2.48e12
+## 11 med          Clinton           8.16e12
+## 12 med          Ford              1.70e12
+## 13 med          GHW_Bush          6.07e12
+## 14 med          Nixon             1.43e12
+## 15 med          Reagan            4.15e12</code></pre>
+</div>
+<div id="visualizing" class="section level2">
+<h2>Visualizing</h2>
+<ol style="list-style-type: decimal">
+<li>The correlation heat map displays the relationships between the three different numeric variables. The lighter the color of the square, the lesser the correlation between variables. The darker the color, the greater the correlation between variables. The two variables with the greatest correlation were per capita income and average GDP. This is intuitive because as more goods and services are produced, the more money these good and service providers are making, which would eventually increase the income made per individual. The two variables with the least correlation were unemployment rate and average GDP. This was surprising, as I thought that unemployment rate would have a greater impact on the total value of goods and services produced in the country (GDP).</li>
+</ol>
+<pre class="r"><code># 1
+df1 &lt;- Combined3 %&gt;% na.omit %&gt;% select_if(is.numeric)
+cor(df1)</code></pre>
+<pre><code>##                   Unemploy_Rate per_capita_income    avgGDP
+## Unemploy_Rate         1.0000000         0.1622467 0.1415209
+## per_capita_income     0.1622467         1.0000000 0.9975972
+## avgGDP                0.1415209         0.9975972 1.0000000</code></pre>
+<pre class="r"><code>ComCor &lt;- cor(df1) %&gt;% as.data.frame %&gt;% rownames_to_column %&gt;% 
+    pivot_longer(-1, names_to = &quot;name&quot;, values_to = &quot;correlation&quot;)
+ComCor %&gt;% ggplot(aes(rowname, name, fill = correlation)) + geom_tile() + 
+    scale_fill_gradient2(low = &quot;blue&quot;, mid = &quot;white&quot;, high = &quot;red&quot;) + 
+    geom_text(aes(label = round(correlation, 3)), color = &quot;black&quot;, 
+        size = 4) + theme(axis.text.x = element_text(hjust = 1)) + 
+    coord_fixed() + labs(title = &quot;Correlation Heat Map&quot;)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<ol start="2" style="list-style-type: decimal">
+<li>This graph displays the average GDP as a function of per capita income and provides information on who was president at the time of each observation. As the per capita income increases, so does the average GDP. As seen in the above correlation heat map, these two variables have the highest correlation, and when plotted on a graph, display an almost perfectly straight line, consistent with the correlation value provided above. In addition, as the observations progress in the upward direction, the presidents during each observation are approximately in chronological order.</li>
+</ol>
+<pre class="r"><code># 2
+Combined3 %&gt;% ggplot(aes(per_capita_income, avgGDP, color = President)) + 
+    geom_point() + theme_minimal() + labs(title = &quot;Per Capita Income vs Average GDP&quot;) + 
+    scale_y_continuous(breaks = seq(0, 2e+13, 2.5e+12)) + xlab(&quot;Per Capita Income&quot;) + 
+    ylab(&quot;Average GDP&quot;)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<ol start="3" style="list-style-type: decimal">
+<li>This graph depicts the mean unemployment rate per president and also provides information on the proportion of per capita income categories during each presdient’s observations. Not many trends were extrapolated from this graph, but it was noted that most presidents that had a lower unemployment rate also fell into the low income category.</li>
+</ol>
+<pre class="r"><code># 3
+Combined3 %&gt;% ggplot(aes(President, Unemploy_Rate, fill = PCincome_cat)) + 
+    geom_bar(stat = &quot;Summary&quot;, fun.y = &quot;mean&quot;) + ggtitle(&quot;Average Unemployment Rate per President&quot;) + 
+    theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+    ylab(&quot;Mean Unemployment Rate&quot;) + scale_fill_brewer(palette = &quot;Set3&quot;, 
+    name = &quot;Per Capita Income Category&quot;)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="dimensionality-reduction" class="section level2">
+<h2>Dimensionality Reduction</h2>
+<p>PC1 accounts for 68.063% of the variance, PC2 accounts for 31.864% of the variance, and PC3 accounts for 0.073% of the variance. A high score on PC1 represents lower monetary circulation during that year in the United States economy. A low score on PC1 represented higher monetary circulation during that year in the United States economy. PC2 represents unempoyment vs monetary circulation. A high score on PC2 represents high unemployment rate and low monetary circulation. A low score on PC2 represents low unemployment rate and high monetary circulation. The years 1948, 1952, and 1953 were high on PC1. The years 2017, 2018, and 2019 were low on PC1. The years 1982, 1983, and 2010 were high on PC2. The years 1953, 2018, and 2018 were low on PC2.</p>
+<pre class="r"><code>Combined4 &lt;- Combined3
+Com_nums &lt;- Combined4 %&gt;% select_if(is.numeric) %&gt;% scale
+rownames(Com_nums) &lt;- Combined4$Year
+Com_pca &lt;- princomp(Com_nums)
+names(Com_pca)</code></pre>
+<pre><code>## [1] &quot;sdev&quot;     &quot;loadings&quot; &quot;center&quot;   &quot;scale&quot;    &quot;n.obs&quot;    &quot;scores&quot;   &quot;call&quot;</code></pre>
+<pre class="r"><code>summary(Com_pca, loadings = T)</code></pre>
+<pre><code>## Importance of components:
+##                           Comp.1    Comp.2       Comp.3
+## Standard deviation     1.4189872 0.9709049 0.0463916036
+## Proportion of Variance 0.6806281 0.3186444 0.0007274978
+## Cumulative Proportion  0.6806281 0.9992725 1.0000000000
+## 
+## Loadings:
+##                   Comp.1 Comp.2 Comp.3
+## Unemploy_Rate      0.202  0.979       
+## per_capita_income  0.694 -0.132 -0.708
+## avgGDP             0.692 -0.153  0.706</code></pre>
+<pre class="r"><code>Comdf &lt;- data.frame(PC1 = Com_pca$scores[, 1], PC2 = Com_pca$scores[, 
+    2])
+ggplot(Comdf, aes(PC1, PC2)) + geom_point()</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>Year &lt;- Combined4$Year
+Com_pca$scores %&gt;% as.data.frame %&gt;% cbind(Year, .) %&gt;% top_n(3, 
+    Comp.1)</code></pre>
+<pre><code>##   Year   Comp.1    Comp.2     Comp.3
+## 1 2017 2.701387 -1.215387 0.05206085
+## 2 2018 2.849541 -1.627777 0.05465566
+## 3 2019 3.017314 -1.726065 0.05843670</code></pre>
+<pre class="r"><code>Com_pca$scores %&gt;% as.data.frame %&gt;% cbind(Year, .) %&gt;% top_n(3, 
+    wt = desc(Comp.1))</code></pre>
+<pre><code>##   Year    Comp.1    Comp.2     Comp.3
+## 1 1948 -1.654704 -1.144009 0.02863762
+## 2 1952 -1.655471 -1.271024 0.02256286
+## 3 1953 -1.687724 -1.455219 0.01901791</code></pre>
+<pre class="r"><code>Com_pca$scores %&gt;% as.data.frame %&gt;% cbind(Year, .) %&gt;% top_n(3, 
+    wt = Comp.2)</code></pre>
+<pre><code>##   Year      Comp.1   Comp.2      Comp.3
+## 1 1982 -0.22728348 1.871446 -0.02747655
+## 2 1983  0.05993202 2.957321 -0.00787163
+## 3 2010  2.37695982 2.096437  0.07667560</code></pre>
+<pre class="r"><code>Com_pca$scores %&gt;% as.data.frame %&gt;% cbind(Year, .) %&gt;% top_n(3, 
+    wt = desc(Comp.2))</code></pre>
+<pre><code>##   Year    Comp.1    Comp.2     Comp.3
+## 1 1953 -1.687724 -1.455219 0.01901791
+## 2 2018  2.849541 -1.627777 0.05465566
+## 3 2019  3.017314 -1.726065 0.05843670</code></pre>
+</div>
+
+              <hr>
+              <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div>
+            </div>
+          </div>
+          <hr>
+        <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+        </div>
+      </div>
+      
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

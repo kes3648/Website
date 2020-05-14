@@ -1,0 +1,2 @@
+"0","#9"
+"0","Combined2%>%mutate(PCincome_cat = case_when(per_capita_income>30000 ~ ""high"",5000<=per_capita_income & per_capita_income<=30000 ~ ""med"",per_capita_income<5000 ~ ""low""))%>%group_by(PCincome_cat)%>%summarize(mean(per_capita_income))"

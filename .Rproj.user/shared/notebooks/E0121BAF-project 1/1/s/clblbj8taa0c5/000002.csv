@@ -1,0 +1,3 @@
+"0","#3"
+"0","Combined3%>%ggplot(aes(President,Unemploy_Rate,fill=PCincome_cat))+geom_bar(stat = ""Summary"",fun.y=""mean"")+ggtitle(""Average Unemployment Rate per President"")+theme(axis.text.x = element_text(angle=30,hjust = 1))+ylab(""Mean Unemployment Rate"")+scale_fill_brewer(palette = ""Set3"",name=""Per Capita Income Category"")"
+"2","Ignoring unknown parameters: fun.y"

@@ -1,0 +1,3 @@
+"0","Combined3<-Combined2%>%mutate(PCincome_cat = case_when(per_capita_income>30000 ~ ""high"",5000<=per_capita_income & per_capita_income<=30000 ~ ""med"",per_capita_income<5000 ~ ""low""))"
+"0","#10"
+"0","Combined3%>%group_by(PCincome_cat,President)%>%summarize(mean(avgGDP))"

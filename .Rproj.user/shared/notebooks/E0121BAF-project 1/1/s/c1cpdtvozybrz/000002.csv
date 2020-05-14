@@ -1,0 +1,2 @@
+"0","#2"
+"0","Combined3%>%ggplot(aes(per_capita_income,avgGDP,color=President))+geom_point()+theme_minimal()+labs(title = ""Per Capita Income vs Average GDP"")+scale_y_continuous(breaks=seq(0, 20000000000000, 2500000000000))+xlab(""Per Capita Income"")+ylab(""Average GDP"")"

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Kristen Shaver" />
+    <meta name="description" content="Describe your website">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>Project 2: Modeling, Testing, Predicting</title>
+    <meta name="generator" content="Hugo 0.70.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/blog/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="resume.pdf">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/project2/">Project 2: Modeling, Testing, Predicting</a></strong>
+          </h3>
+        </div>
+        <div class="blog-title">
+          <h4>
+          January 1, 0001
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<div id="main-variable-introduction" class="section level2">
+<h2>Main Variable Introduction</h2>
+<p>The data set chosen was “pbc”. This data set contains information on a Mayo Clinic Trial for a Primary Biliary Cirrhosis (PBC) treatment. The set originally contained 418 observations, with each observation representing a patient involved in the trial. Any observation containing NAs were removed for the sake of simplicity, leaving 276 observations. During this trial, patients were either given the treatment, consiting of D-Penacillamine, or a placebo at random, and then different values and observations were tested and recorded. The main variables used in this project include “trt”, “age”, “sex”, “copper”, “stage”, and “y”. “trt” represents the treatment given to each individual consists of the two character variables “DPenacill”, short for D-Penacillamine, and “placebo”. “age” represents the age of the individual in years at the time of participation in the trial. “sex” represents the sex of the individual participating in the trial and contains the values “f” and “m”, representing female and male, repsectively. “copper” represents the amount of copper in the individual’s urine in micro-grams per day. “stage” represents the histologic stage of PBC that the individual was experiencing at the itme of their participation in the trial. This vairable contains values 1-4, with 1 being the least severe stage and 4 being the most severe stage. “y” represents the survival of the individual and contains the values “1” and “0”, representing dead and living, repsectively.</p>
+</div>
+<div id="other-variables" class="section level2">
+<h2>Other Variables</h2>
+<p>The other variables include: “ascites” which is a build-up of fluid in the abdomen (1-present, 0-absent); “hepato” which represents hepatomegaly, or enlarged liver (1-present, 0-absent); “spiders” which refers to blood vessel malformations in the skin (1-present, 0-absent); “edema” which refers to swelling due to fluid build-up in body tissues (0-absent, 0.5-untreated or successfully treated, 1-edema despite therapy); “bili” represents serum bilirubin, measured in milligrams per deciliter; “chol” represents serum cholesterol, measured in milligrams per deciliter; “albumin” represents serum albumin, measured in grams per deciliter; “alk.phos” represents alkaline phosphatase, measured in units per liter; “ast” represents aspartate aminotransferase, measured in units per milliliter; “trig” represents triglycerides, measured in milligrams per deciliter; “platelet” represents platelet count; and “protime” represents blood clotting time.</p>
+<pre class="r"><code>library(survival)
+library(dplyr)
+pbcd &lt;- pbc %&gt;% na.omit %&gt;% select(cols = -1) %&gt;% mutate(y = ifelse(status == 
+    &quot;2&quot;, 1, 0)) %&gt;% select(cols = -c(1:2), -9) %&gt;% mutate(trt = recode(trt, 
+    `1` = &quot;DPenacill&quot;, `2` = &quot;Placebo&quot;))
+pbcd$stage &lt;- factor(pbcd$stage, levels = c(&quot;4&quot;, &quot;3&quot;, &quot;2&quot;, &quot;1&quot;))
+head(pbcd)</code></pre>
+<pre><code>##         trt      age sex ascites hepato spiders bili chol albumin copper
+## 1 DPenacill 58.76523   f       1      1       1 14.5  261    2.60    156
+## 2 DPenacill 56.44627   f       0      1       1  1.1  302    4.14     54
+## 3 DPenacill 70.07255   m       0      0       0  1.4  176    3.48    210
+## 4 DPenacill 54.74059   f       0      1       1  1.8  244    2.54     64
+## 5   Placebo 38.10541   f       0      1       1  3.4  279    3.53    143
+##   alk.phos    ast trig platelet protime stage y
+## 1   1718.0 137.95  172      190    12.2     4 1
+## 2   7394.8 113.52   88      221    10.6     3 0
+## 3    516.0  96.10   55      151    12.0     4 1
+## 4   6121.8  60.63   92      183    10.3     4 1
+## 5    671.0 113.15   72      136    10.9     3 0
+##  [ reached &#39;max&#39; / getOption(&quot;max.print&quot;) -- omitted 1 rows ]</code></pre>
+</div>
+</div>
+<div id="manova" class="section level1">
+<h1>MANOVA</h1>
+<p>The MANOVA was significant (p&lt;&lt;0.05), which means that the numeric variables used show a mean difference across the categorical variable, “y”. Univariate ANOVAs were run to determine which numeric variables differed across the y variable. It was found that all numeric variables except “platelet” (i.e. age, bili, chol, albumin, copper, alk.phos, ast, trig, protime) differed significantly between the “1” and “0” categories of “y”. The post-hoc t-tests were not performed because the categorical variable, “y”, is a binary variable, and performing the post-hoc t-test would have been redundant.</p>
+<p>##Type I Error and Bonferroni Corrected Alpha-Value
+There were 11 total tests run (1 MANOVA, 10 univariate ANOVA), so probability that a type I error was made is 0.431. The Bonferronia corrected alpha-value was calculated to be 0.0045. When using the corrected alpha-value, we see that “chol” is no longer significant between the two “y” categories.</p>
+<div id="assumptions" class="section level2">
+<h2>Assumptions</h2>
+<p>MANOVAs require many assumptions. The data meets the assumption of random samples with individual observations. For the numeric variables, it is reasonable to assume that they meet the assumption of multivariate normality of dependent variables. It is unclear whether the assumption of homogeneity of within-group covariance matrices is met. I think it would be reasonable to assume that the dependent variables meet the linear relationship assumption. It is unclear whether there is any extreme univariate or multivariate outliers. It is probably reasonable to assume that the multicolineraity assumption is not met.</p>
+<pre class="r"><code># MANOVA
+man1 &lt;- manova(cbind(age, bili, chol, albumin, copper, alk.phos, 
+    ast, trig, platelet, protime) ~ y, data = pbcd)
+summary(man1)</code></pre>
+<pre><code>##            Df  Pillai approx F num Df den Df    Pr(&gt;F)    
+## y           1 0.36824   15.446     10    265 &lt; 2.2e-16 ***
+## Residuals 274                                             
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code># Univariate ANOVA
+summary.aov(man1)</code></pre>
+<pre><code>##  Response age :
+##              Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## y             1  2343.4 2343.36  22.843 2.872e-06 ***
+## Residuals   274 28108.8  102.59                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response bili :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## y             1 1023.1 1023.10  58.419 3.582e-13 ***
+## Residuals   274 4798.6   17.51                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response chol :
+##              Df   Sum Sq Mean Sq F value Pr(&gt;F)   
+## y             1   421238  421238  7.8313 0.0055 **
+## Residuals   274 14738295   53789                  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response albumin :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## y             1  3.457  3.4570  22.768 2.976e-06 ***
+## Residuals   274 41.603  0.1518                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response copper :
+##              Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## y             1  290786  290786  43.025 2.685e-10 ***
+## Residuals   274 1851842    6759                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response alk.phos :
+##              Df     Sum Sq   Mean Sq F value   Pr(&gt;F)    
+## y             1  100364350 100364350  24.329 1.41e-06 ***
+## Residuals   274 1130328499   4125286                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response ast :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## y             1  56205   56205  18.588 2.266e-05 ***
+## Residuals   274 828512    3024                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response trig :
+##              Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## y             1   52777   52777  12.921 0.0003852 ***
+## Residuals   274 1119157    4085                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response platelet :
+##              Df  Sum Sq Mean Sq F value  Pr(&gt;F)  
+## y             1   27900 27899.9  3.2431 0.07282 .
+## Residuals   274 2357171  8602.8                  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response protime :
+##              Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## y             1  41.787  41.787  48.147 2.853e-11 ***
+## Residuals   274 237.805   0.868                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code># Probability of Type I Error
+1 - (0.95^11)</code></pre>
+<pre><code>## [1] 0.4311999</code></pre>
+<pre class="r"><code># Bonferroni Corrected Alpha-Value
+0.05/11</code></pre>
+<pre><code>## [1] 0.004545455</code></pre>
+</div>
+</div>
+<div id="randomization-test" class="section level1">
+<h1>Randomization Test</h1>
+<p>After doing some research, I found that D-Penacillamine was thought to have the ability to reduce hepatic copper in individuals with PBC. I decided to test whether the two treatment conditions, D-penacillamine and the placebo, varried in mean copper values.</p>
+<p>##Hypotheses
+Null Hypothesis: There is no difference in mean copper levels between the D-penacillamine treatment group and the placebo.
+Alternative: There is a difference in mean copper levels between the D-penacillamine treatment group and the placebo.</p>
+<p>##Conclusion
+There was found to be no significant difference in mean copper values between the two treatment groups (t=0.227, critical value=6.314, df=1, alpha=0.05).</p>
+<pre class="r"><code>pbcd %&gt;% group_by(trt) %&gt;% summarize(s = sd(copper)) %&gt;% summarize(diff(s))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `diff(s)`
+##       &lt;dbl&gt;
+## 1     -13.0</code></pre>
+<pre class="r"><code>rand_dist &lt;- vector()
+for (i in 1:5000) {
+    new &lt;- data.frame(copper = sample(pbcd$copper), trt = pbcd$trt)
+    rand_dist[i] &lt;- mean(new[new$trt == &quot;DPenacill&quot;, ]$copper) - 
+        mean(new[new$trt == &quot;Placebo&quot;, ]$copper)
+}
+mean(rand_dist &lt; -12.975 | rand_dist &gt; 12.975)</code></pre>
+<pre><code>## [1] 0.2242</code></pre>
+<pre class="r"><code>{
+    hist(rand_dist, main = &quot;&quot;, ylab = &quot;&quot;)
+    abline(v = -12.975, col = &quot;red&quot;)
+    abline(v = 12.975, col = &quot;red&quot;)
+}</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="linear-regression" class="section level1">
+<h1>Linear Regression</h1>
+<p>First, I mean-centered all numeric variables before deciding which ones to include in my regression. I then decided that I wanted to look again at the effects of the treatment type on copper values, but this time, with the interaction of age and sex. I created the dummy variable, “trt2”, with values “1” and “0” to represent D-Penaclimmaine and placebo treatments, respectively.</p>
+<div id="coefficient-interpretation" class="section level2">
+<h2>Coefficient Interpretation</h2>
+<p>Predicted copper values for a male of that recieved the placebo, when controlling for age, is 137.5052 ug/day (micrograms per day). When controlling for age, males that recieved the D-Penacillamine treatment had an increase in copper value of 30.1542 ug/day. When controlling for age, females that recieved the placebo had a decrease in copper value of 43.4743 ug/day. A male of average age that recieved the placebo had a decrease in copper value of 0.8459 ug/day. When controlling for age, a female that recieved the D-Penacillamine treatment had a decrease in copper value of 34.2443 ug/day. A male of average age that recieved the D-Penacillamine treament had an increase in copper value of 2.7993 ug/day. A female of average age that recieved the placebo had an increase in copper value of 0.5995 ug/day. A female of average age that recieved the D-Penacillamine treatment had a decrease in copper value of 2.1843 ug/day.</p>
+<p>##Assumptions
+The assumptions of homoskedasticity, linearity, and normality were not met, per the graphs.</p>
+<p>##Robust Standard Error
+In the regression with the normal standard errors, none of the coefficients were significant. When the robust standard errors were applied, still none of the coefficients were significant.</p>
+<p>##Proportion of Variance
+According to the R-squared value, the model explains 3.741% of variation. According to the adjusted R-squared vlaue, the model explains 1.227% of the variation.</p>
+<pre class="r"><code># Mean-Centering
+pbcd1 &lt;- pbcd %&gt;% mutate(age_c = pbcd$age - mean(pbcd$age), bili_c = pbcd$bili - 
+    mean(pbcd$bili), chol_c = pbcd$chol - mean(pbcd$chol), albumin_c = pbcd$albumin - 
+    mean(pbcd$albumin), copper_c = pbcd$copper - mean(copper), 
+    alk.phos_c = pbcd$alk.phos - mean(pbcd$alk.phos), ast_c = pbcd$ast - 
+        mean(pbcd$ast), trig_c = pbcd$trig - mean(pbcd$trig), 
+    protime_c = pbcd$protime - mean(pbcd$protime), platelet_c = pbcd$platelet - 
+        mean(pbcd$platelet)) %&gt;% mutate(trt2 = ifelse(trt == 
+    &quot;DPenacill&quot;, 1, 0))
+
+# Linear Regression
+fit1 &lt;- lm(copper ~ trt2 * sex * age_c, data = pbcd1)
+summary(fit1)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = copper ~ trt2 * sex * age_c, data = pbcd1)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -148.70  -53.54  -21.30   22.36  496.54 
+## 
+## Coefficients:
+##                 Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)     137.5052    28.3854   4.844 2.15e-06 ***
+## trt2             30.1542    35.6319   0.846    0.398    
+## sexf            -43.4743    29.4557  -1.476    0.141    
+## age_c            -0.8459     2.2773  -0.371    0.711    
+## trt2:sexf       -34.2443    37.3509  -0.917    0.360    
+## trt2:age_c        2.7993     2.7561   1.016    0.311    
+## sexf:age_c        0.5995     2.4209   0.248    0.805    
+## trt2:sexf:age_c  -2.1843     2.9738  -0.735    0.463    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 85.76 on 268 degrees of freedom
+## Multiple R-squared:  0.08008,    Adjusted R-squared:  0.05606 
+## F-statistic: 3.333 on 7 and 268 DF,  p-value: 0.002019</code></pre>
+<pre class="r"><code>library(ggplot2)
+pbcd1 %&gt;% ggplot(aes(age_c, copper_c, color = sex)) + geom_point() + 
+    geom_smooth(method = &quot;lm&quot;, se = F)</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># Homoskedasticity and linearity
+resids &lt;- fit1$residuals
+fitvals &lt;- fit1$fitted.values
+ggplot() + geom_point(aes(fitvals, resids)) + geom_hline(yintercept = 0, 
+    color = &quot;red&quot;)</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># Normality
+ggplot() + geom_histogram(aes(resids), bins = 20)</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot() + geom_qq(aes(sample = resids)) + geom_qq_line(aes(sample = resids))</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># Robust SE
+library(sandwich)
+library(lmtest)
+coeftest(fit1, vcov = vcovHC(fit1))</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##                  Estimate Std. Error t value  Pr(&gt;|t|)    
+## (Intercept)     137.50524   32.77923  4.1949 3.715e-05 ***
+## trt2             30.15420   51.00242  0.5912    0.5549    
+## sexf            -43.47426   33.65626 -1.2917    0.1976    
+## age_c            -0.84585    2.76685 -0.3057    0.7601    
+## trt2:sexf       -34.24425   52.19228 -0.6561    0.5123    
+## trt2:age_c        2.79928    4.13362  0.6772    0.4989    
+## sexf:age_c        0.59948    2.86893  0.2090    0.8346    
+## trt2:sexf:age_c  -2.18432    4.23836 -0.5154    0.6067    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+</div>
+</div>
+<div id="linear-regression-with-bootstrapped-standard-errors" class="section level1">
+<h1>Linear Regression with Bootstrapped Standard Errors</h1>
+<p>The standard errors for every coefficient decreased, except that of age_c and sexf:age_c which icreased.</p>
+<pre class="r"><code>samp_distn &lt;- vector()
+samp_distn &lt;- replicate(5000, {
+    boot_dat &lt;- sample_frac(pbcd1, replace = T)
+    fit2 &lt;- lm(copper ~ trt2 * sex * age_c, data = boot_dat)
+    coef(fit2)
+})
+samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept)     trt2     sexf    age_c trt2:sexf trt2:age_c sexf:age_c
+## 1    29.78473 45.80252 30.75671 2.689921  46.83318   3.813321   2.795678
+##   trt2:sexf:age_c
+## 1        3.944006</code></pre>
+</div>
+<div id="logistic-regression" class="section level1">
+<h1>Logistic Regression</h1>
+<div id="coefficient-interpretation-1" class="section level2">
+<h2>Coefficient Interpretation</h2>
+<p>When controlling for every variable, an individual has a 3x10^6 odds of dying. When controlling for every variable except age, an individual’s odds of death increase by a factor of 1.053 per year of life. When controlling for everything but “sex”, females’ odds of death decreased by a factor of 0.526. When for controlling for everything except “ascites”, individuals with ascites saw odds of death increase by a factor of 4.370. When controlling for everything except “hepato”, individuals with hepato saw odds of death increase by a factor of 1.135. When controlling for everything except “spiders”, individuals with spiders saw odds of death increase by a factor of 1.465. When controlling for everything except “bili”, an individual’s odds of death increased by a factor of 1.167 per 1 mg/dl increase in serum bilirubin. When controlling for everything but “chol”, an individual’s odds of death increased by a factor of 1.0003 per 1 mg/dl inrease in serum cholesterol. When controlling for everything except “albumin”, individual’s odds of death decreased by a factor of 0.883 for every 1 g/dl increase in serum albumin. When controlling for everything except “copper”, an individual’s odds of death increased by a factor of 1.003 for every 1 ug/day increase in urine copper. When controlling for everything except “alk.phos”, an individual’s odds of death increased by a factor of 1.0003 for every 1 U/liter increase in alkaline phosphatase. When controlling for everything except “ast”, an individual’s odds of death increased by a factor of 1.006 for every 1 U/ml increase in aspartate aminotransferase. When controlling for everything except “trig”, an individual’s odds of death increased by a factor of 1.002 for every 1 mg/dl increase in triglycerides. When controlling for everything except “platelet”, an individual’s odds of death decreased by a factor of 0.999 for every 1 unit increase in patelet count. When controlling for everything except “protime”, an individual’s odds of death increased by a factor of 2.084 for every 1 unit increase in blood clotting time. When controlling for everything except “stage 3”, an individual’s odds of death increased by a factor of 1.057 when they progress to stage 3 PBC. When controlling for everything except “stage 2”, an individual’s odds of death decreased by a factor of 0822 when they progress to stage 2 PBC. When controlling for everything except “stage 1”, an individual’s odds of death decreased by a factor of 0.062 when they progress to stage 1 PBC. When controlling for everything except “trt2”, an individual’s odds of death increased by a factor of 1.337 when treated with D-Penacillamine.</p>
+</div>
+<div id="accuracy-tpr-tnr-ppv" class="section level2">
+<h2>Accuracy, TPR, TNR, PPV</h2>
+<p>TNR (specificity) was found to be 0.885. TPR (sensitivity) was found to be 0.712. FNR was found to be 0.115. FPR was found to be 0.297. PPV was found to be 0.806. Accuracy was found to be 0.815.</p>
+</div>
+<div id="auc" class="section level2">
+<h2>AUC</h2>
+<p>The AUC score was found to be 0.887, which is cosidered to be “good”.</p>
+</div>
+<div id="out-of-sample-accuracy-tpr-and-ppv" class="section level2">
+<h2>Out of Sample Accuracy, TPR, and PPV</h2>
+<p>The out of sample accuracy was found to be 0.786, while TPR was 0.664, and PPV was 0.775.</p>
+<pre class="r"><code># Logistic Regression
+pbcd4 &lt;- pbcd1 %&gt;% select(cols = -1, -c(18:27))
+logit &lt;- function(p) log(odds(p))
+fit3 &lt;- glm(y ~ ., data = pbcd4, family = &quot;binomial&quot;)
+exp(coef(fit3))</code></pre>
+<pre><code>##  (Intercept)          age         sexf      ascites       hepato      spiders 
+## 3.440977e-06 1.052614e+00 5.257586e-01 4.369682e+00 1.135037e+00 1.465377e+00 
+##         bili         chol      albumin       copper     alk.phos          ast 
+## 1.166779e+00 1.000305e+00 8.826740e-01 1.002974e+00 1.000272e+00 1.005864e+00 
+##         trig     platelet      protime       stage3       stage2       stage1 
+## 1.002193e+00 9.999037e-01 2.083858e+00 1.056744e+00 8.222818e-01 6.163737e-02 
+##         trt2 
+## 1.337014e+00</code></pre>
+<pre class="r"><code>prob3 &lt;- predict(fit3, type = &quot;response&quot;)
+
+# Confusion Matrix
+table(predict = as.numeric(prob3 &gt; 0.5), truth = pbcd$y) %&gt;% 
+    addmargins</code></pre>
+<pre><code>##        truth
+## predict   0   1 Sum
+##     0   146  33 179
+##     1    19  78  97
+##     Sum 165 111 276</code></pre>
+<pre class="r"><code># Accuracy, TPR, TNR, PPV
+146/165</code></pre>
+<pre><code>## [1] 0.8848485</code></pre>
+<pre class="r"><code>78/111</code></pre>
+<pre><code>## [1] 0.7027027</code></pre>
+<pre class="r"><code>19/165</code></pre>
+<pre><code>## [1] 0.1151515</code></pre>
+<pre class="r"><code>33/111</code></pre>
+<pre><code>## [1] 0.2972973</code></pre>
+<pre class="r"><code>79/98</code></pre>
+<pre><code>## [1] 0.8061224</code></pre>
+<pre class="r"><code>(146 + 79)/276</code></pre>
+<pre><code>## [1] 0.8152174</code></pre>
+<pre class="r"><code># Density plot
+pbcd2 &lt;- pbcd
+pbcd2$logit &lt;- predict(fit3)
+pbcd2$y &lt;- factor(pbcd2$y, levels = c(&quot;1&quot;, &quot;0&quot;))
+ggplot(pbcd2, aes(logit, fill = y)) + geom_density(alpha = 0.3) + 
+    geom_vline(xintercept = 0, lty = 2)</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># ROCplot
+library(plotROC)
+pbcd$prob3 &lt;- predict(fit3, type = &quot;response&quot;)
+ROCplot &lt;- ggplot(pbcd) + geom_roc(aes(d = y, m = prob3), n.cuts = 0)
+calc_auc(ROCplot)</code></pre>
+<pre><code>##   PANEL group       AUC
+## 1     1    -1 0.8873055</code></pre>
+<pre class="r"><code># Classification Diagnostics Function
+class_diag &lt;- function(probs, truth) {
+    
+    # CONFUSION MATRIX: CALCULATE ACCURACY, TPR, TNR, PPV
+    tab &lt;- table(factor(probs &gt; 0.5, levels = c(&quot;FALSE&quot;, &quot;TRUE&quot;)), 
+        truth)
+    acc = sum(diag(tab))/sum(tab)
+    sens = tab[2, 2]/colSums(tab)[2]
+    spec = tab[1, 1]/colSums(tab)[1]
+    ppv = tab[2, 2]/rowSums(tab)[2]
+    
+    if (is.numeric(truth) == FALSE &amp; is.logical(truth) == FALSE) 
+        truth &lt;- as.numeric(truth) - 1
+    
+    # CALCULATE EXACT AUC
+    ord &lt;- order(probs, decreasing = TRUE)
+    probs &lt;- probs[ord]
+    truth &lt;- truth[ord]
+    
+    TPR = cumsum(truth)/max(1, sum(truth))
+    FPR = cumsum(!truth)/max(1, sum(!truth))
+    
+    dup &lt;- c(probs[-1] &gt;= probs[-length(probs)], FALSE)
+    TPR &lt;- c(0, TPR[!dup], 1)
+    FPR &lt;- c(0, FPR[!dup], 1)
+    
+    n &lt;- length(TPR)
+    auc &lt;- sum(((TPR[-1] + TPR[-n])/2) * (FPR[-1] - FPR[-n]))
+    
+    data.frame(acc, sens, spec, ppv, auc)
+}
+
+# Cross-Validation
+set.seed(1234)
+k = 10
+data &lt;- pbcd[sample(nrow(pbcd)), ]
+folds &lt;- cut(seq(1:nrow(pbcd)), breaks = k, labels = F)
+diags &lt;- NULL
+for (i in 1:k) {
+    train &lt;- data[folds != i, ]
+    test &lt;- data[folds == i, ]
+    truth &lt;- test$y
+    fit4 &lt;- glm(y ~ ., data = train, family = &quot;binomial&quot;)
+    probs &lt;- predict(fit4, newdata = test, type = &quot;response&quot;)
+    diags &lt;- rbind(diags, class_diag(probs, truth))
+}
+summarize_all(diags, mean)</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.7835979 0.7019123 0.8386171 0.7570851 0.8494833</code></pre>
+</div>
+</div>
+<div id="lasso" class="section level1">
+<h1>LASSO</h1>
+<p>The variables retained from LASSO are all of them except “platelet” and “stagethree”. The out of sample accuracy here is 0.772, which is slightly lower than that of the logistic regression.</p>
+<pre class="r"><code># Lasso
+pbcd3 &lt;- pbcd %&gt;% mutate(stageone = ifelse(stage == &quot;1&quot;, 1, 0)) %&gt;% 
+    mutate(stagetwo = ifelse(stage == &quot;2&quot;, 1, 0)) %&gt;% mutate(stagethree = ifelse(stage == 
+    &quot;3&quot;, 1, 0)) %&gt;% mutate(stagefour = ifelse(stage == &quot;4&quot;, 1, 
+    0))
+library(glmnet)
+y &lt;- as.matrix(pbcd$y)
+x &lt;- model.matrix(y ~ trt + age + sex + ascites + hepato + spiders + 
+    bili + chol + albumin + copper + alk.phos + ast + trig + 
+    platelet + protime + stageone + stagetwo + stagethree + stagefour, 
+    data = pbcd3)[, -1]
+cv &lt;- cv.glmnet(x, y, family = &quot;binomial&quot;)
+lasso &lt;- glmnet(x, y, family = &quot;binomial&quot;, lambda = cv$lambda.1se)
+coef(lasso)</code></pre>
+<pre><code>## 20 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                        s0
+## (Intercept) -5.9611271874
+## trtPlacebo   .           
+## age          0.0201852334
+## sexf         .           
+## ascites      0.0176558935
+## hepato       0.0923682237
+## spiders      .           
+## bili         0.0955298463
+## chol         .           
+## albumin      .           
+## copper       0.0025362368
+## alk.phos     0.0001082135
+## ast          0.0003540330
+## trig         .           
+## platelet     .           
+## protime      0.3416297035
+## stageone     .           
+## stagetwo     .           
+## stagethree   .           
+## stagefour    .</code></pre>
+<pre class="r"><code># Cross-Validation
+set.seed(1234)
+k = 10
+data2 &lt;- pbcd3 %&gt;% sample_frac
+folds2 &lt;- ntile(1:nrow(data2), n = 10)
+diags2 &lt;- NULL
+for (i in 1:k) {
+    train2 &lt;- data2[folds2 != i, ]
+    test2 &lt;- data2[folds2 == i, ]
+    truth2 &lt;- test2$y
+    fit5 &lt;- glm(y ~ age + trt + sex + ascites + hepato + spiders + 
+        bili + chol + albumin + copper + alk.phos + ast + trig + 
+        protime + stageone + stagetwo + stagefour, data = train2, 
+        family = &quot;binomial&quot;)
+    probs5 &lt;- predict(fit5, newdata = test2, type = &quot;response&quot;)
+    diags2 &lt;- rbind(diags2, class_diag(probs5, truth2))
+}
+diags2 %&gt;% summarize_all(mean)</code></pre>
+<pre><code>##         acc      sens      spec       ppv      auc
+## 1 0.7719577 0.6852456 0.8294672 0.7472222 0.853221</code></pre>
+</div>
+
+              <hr>
+              <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div>
+            </div>
+          </div>
+          <hr>
+        <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+        </div>
+      </div>
+      
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

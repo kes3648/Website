@@ -1,0 +1,5 @@
+"0","GDP1<-GDP%>%separate(Date,4,into=c(""Year""))%>%group_by(Year)%>%summarize(avgGDP_billions=mean(GDP_billions))
+"
+"2","Error in GDP %>% separate(Date, 4, into = c(""Year"")) %>% group_by(Year) %>%  : 
+  could not find function ""%>%""
+"

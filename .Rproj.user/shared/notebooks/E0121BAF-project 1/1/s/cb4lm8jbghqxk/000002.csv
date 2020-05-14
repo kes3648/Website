@@ -1,0 +1,2 @@
+"0","#8"
+"0","Combined2%>%group_by(President)%>%summarize(mean(Unemploy_Rate))"

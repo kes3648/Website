@@ -1,0 +1,266 @@
+---
+title: "Project 2: Modeling, Testing, Predicting"
+author: "Kristen Shaver (kes3648)"
+date: ""
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+# Introduction
+
+## Main Variable Introduction
+The data set chosen was "pbc". This data set contains information on a Mayo Clinic Trial for a Primary Biliary Cirrhosis (PBC) treatment. The set originally contained 418 observations, with each observation representing a patient involved in the trial. Any observation containing NAs were removed for the sake of simplicity, leaving 276 observations. During this trial, patients were either given the treatment, consiting of D-Penacillamine, or a placebo at random, and then different values and observations were tested and recorded. The main variables used in this project include "trt", "age", "sex", "copper", "stage", and "y". "trt" represents the treatment given to each individual consists of the two character variables "DPenacill", short for D-Penacillamine, and "placebo". "age" represents the age of the individual in years at the time of participation in the trial. "sex" represents the sex of the individual participating in the trial and contains the values "f" and "m", representing female and male, repsectively. "copper" represents the amount of copper in the individual's urine in micro-grams per day. "stage" represents the histologic stage of PBC that the individual was experiencing at the itme of their participation in the trial. This vairable contains values 1-4, with 1 being the least severe stage and 4 being the most severe stage. "y" represents the survival of the individual and contains the values "1" and "0", representing dead and living, repsectively.
+
+## Other Variables
+The other variables include: "ascites" which is a build-up of fluid in the abdomen (1-present, 0-absent); "hepato" which represents hepatomegaly, or enlarged liver (1-present, 0-absent); "spiders" which refers to blood vessel malformations in the skin (1-present, 0-absent); "edema" which refers to swelling due to fluid build-up in body tissues (0-absent, 0.5-untreated or successfully treated, 1-edema despite therapy); "bili" represents serum bilirubin, measured in milligrams per deciliter; "chol" represents serum cholesterol, measured in milligrams per deciliter; "albumin" represents serum albumin, measured in grams per deciliter; "alk.phos" represents alkaline phosphatase, measured in units per liter; "ast" represents aspartate aminotransferase, measured in units per milliliter; "trig" represents triglycerides, measured in milligrams per deciliter; "platelet" represents platelet count; and "protime" represents blood clotting time.
+
+```{R}
+library(survival)
+library(dplyr)
+pbcd<-pbc%>%na.omit%>%select(cols=-1)%>%mutate(y=ifelse(status=="2",1,0))%>%select(cols=-c(1:2),-9)%>%mutate(trt=recode(trt,"1"="DPenacill","2"="Placebo"))
+pbcd$stage<-factor(pbcd$stage,levels=c("4","3","2","1"))
+head(pbcd)
+```
+
+# MANOVA
+
+The MANOVA was significant (p<<0.05), which means that the numeric variables used show a mean difference across the categorical variable, "y". Univariate ANOVAs were run to determine which numeric variables differed across the y variable. It was found that all numeric variables except "platelet" (i.e. age, bili, chol, albumin, copper, alk.phos, ast, trig, protime) differed significantly between the "1" and "0" categories of "y". The post-hoc t-tests were not performed because the categorical variable, "y", is a binary variable, and performing the post-hoc t-test would have been redundant.
+
+##Type I Error and Bonferroni Corrected Alpha-Value
+There were 11 total tests run (1 MANOVA, 10 univariate ANOVA), so probability that a type I error was made is 0.431. The Bonferronia corrected alpha-value was calculated to be 0.0045. When using the corrected alpha-value, we see that "chol" is no longer significant between the two "y" categories.
+
+## Assumptions
+MANOVAs require many assumptions. The data meets the assumption of random samples with individual observations. For the numeric variables, it is reasonable to assume that they meet the assumption of multivariate normality of dependent variables. It is unclear whether the assumption of homogeneity of within-group covariance matrices is met. I think it would be reasonable to assume that the dependent variables meet the linear relationship assumption. It is unclear whether there is any extreme univariate or multivariate outliers. It is probably reasonable to assume that the multicolineraity assumption is not met.
+
+```{R}
+#MANOVA
+man1<-manova(cbind(age,bili,chol,albumin,copper,alk.phos,ast,trig,platelet,protime)~y, data=pbcd)
+summary(man1)
+
+#Univariate ANOVA
+summary.aov(man1)
+
+#Probability of Type I Error
+1-(0.95^11)
+
+#Bonferroni Corrected Alpha-Value
+0.05/11
+```
+
+# Randomization Test
+
+After doing some research, I found that D-Penacillamine was thought to have the ability to reduce hepatic copper in individuals with PBC. I decided to test whether the two treatment conditions, D-penacillamine and the placebo, varried in mean copper values.
+
+##Hypotheses
+Null Hypothesis: There is no difference in mean copper levels between the D-penacillamine treatment group and the placebo.
+Alternative: There is a difference in mean copper levels between the D-penacillamine treatment group and the placebo.
+
+##Conclusion
+There was found to be no significant difference in mean copper values between the two treatment groups (t=0.227, critical value=6.314, df=1, alpha=0.05).
+
+```{R}
+pbcd%>%group_by(trt)%>%summarize(s=sd(copper))%>%summarize(diff(s))
+rand_dist<-vector()
+for(i in 1:5000){
+  new<-data.frame(copper=sample(pbcd$copper),trt=pbcd$trt)
+  rand_dist[i]<-mean(new[new$trt=="DPenacill",]$copper)-mean(new[new$trt=="Placebo",]$copper)
+}
+mean(rand_dist< -12.975 | rand_dist > 12.975)
+{hist(rand_dist,main="",ylab=""); abline(v = -12.975,col="red"); abline(v = 12.975,col="red")}
+```
+
+# Linear Regression
+
+First, I mean-centered all numeric variables before deciding which ones to include in my regression. I then decided that I wanted to look again at the effects of the treatment type on copper values, but this time, with the interaction of age and sex. I created the dummy variable, "trt2", with values "1" and "0" to represent D-Penaclimmaine and placebo treatments, respectively.
+
+## Coefficient Interpretation
+Predicted copper values for a male of that recieved the placebo, when controlling for age, is 137.5052 ug/day (micrograms per day). When controlling for age, males that recieved the D-Penacillamine treatment had an increase in copper value of 30.1542 ug/day. When controlling for age, females that recieved the placebo had a decrease in copper value of 43.4743 ug/day. A male of average age that recieved the placebo had a decrease in copper value of 0.8459 ug/day. When controlling for age, a female that recieved the D-Penacillamine treatment had a decrease in copper value of 34.2443 ug/day. A male of average age that recieved the D-Penacillamine treament had an increase in copper value of 2.7993 ug/day. A female of average age that recieved the placebo had an increase in copper value of 0.5995 ug/day. A female of average age that recieved the D-Penacillamine treatment had a decrease in copper value of 2.1843 ug/day.
+
+##Assumptions
+The assumptions of homoskedasticity, linearity, and normality were not met, per the graphs.
+
+##Robust Standard Error
+In the regression with the normal standard errors, none of the coefficients were significant. When the robust standard errors were applied, still none of the coefficients were significant.
+
+##Proportion of Variance
+According to the R-squared value, the model explains 3.741% of variation. According to the adjusted R-squared vlaue, the model explains 1.227% of the variation.
+
+```{R}
+#Mean-Centering
+pbcd1<-pbcd%>%mutate(age_c=pbcd$age-mean(pbcd$age),bili_c=pbcd$bili-mean(pbcd$bili),chol_c=pbcd$chol-mean(pbcd$chol),albumin_c=pbcd$albumin-mean(pbcd$albumin),copper_c=pbcd$copper-mean(copper),alk.phos_c=pbcd$alk.phos-mean(pbcd$alk.phos),ast_c=pbcd$ast-mean(pbcd$ast),trig_c=pbcd$trig-mean(pbcd$trig),protime_c=pbcd$protime-mean(pbcd$protime),platelet_c=pbcd$platelet-mean(pbcd$platelet))%>%mutate(trt2=ifelse(trt=="DPenacill",1,0))
+
+#Linear Regression
+fit1<-lm(copper~trt2*sex*age_c,data=pbcd1)
+summary(fit1)
+library(ggplot2)
+pbcd1%>%ggplot(aes(age_c,copper_c,color=sex))+geom_point()+geom_smooth(method = 'lm',se=F)
+
+#Homoskedasticity and linearity
+resids<-fit1$residuals
+fitvals<-fit1$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, color='red')
+
+#Normality
+ggplot()+geom_histogram(aes(resids), bins=20)
+ggplot()+geom_qq(aes(sample=resids))+geom_qq_line(aes(sample=resids))
+
+#Robust SE
+library(sandwich)
+library(lmtest)
+coeftest(fit1, vcov=vcovHC(fit1))
+```
+
+# Linear Regression with Bootstrapped Standard Errors
+
+The standard errors for every coefficient decreased, except that of age_c and sexf:age_c which icreased.
+
+```{R}
+samp_distn<-vector()
+samp_distn<-replicate(5000, {
+  boot_dat <- sample_frac(pbcd1, replace=T)
+  fit2 <- lm(copper~trt2*sex*age_c,data=boot_dat)
+  coef(fit2)
+})
+samp_distn %>% t %>% as.data.frame %>% summarize_all(sd)
+```
+
+# Logistic Regression
+
+## Coefficient Interpretation
+When controlling for every variable, an individual has a 3x10^6 odds of dying. When controlling for every variable except age, an individual's odds of death increase by a factor of 1.053 per year of life. When controlling for everything but "sex", females' odds of death decreased by a factor of 0.526. When for controlling for everything except "ascites", individuals with ascites saw odds of death increase by a factor of 4.370. When controlling for everything except "hepato", individuals with hepato saw odds of death increase by a factor of 1.135. When controlling for everything except "spiders", individuals with spiders saw odds of death increase by a factor of 1.465. When controlling for everything except "bili", an individual's odds of death increased by a factor of 1.167 per 1 mg/dl increase in serum bilirubin. When controlling for everything but "chol", an individual's odds of death increased by a factor of 1.0003 per 1 mg/dl inrease in serum cholesterol. When controlling for everything except "albumin", individual's odds of death decreased by a factor of 0.883 for every 1 g/dl increase in serum albumin. When controlling for everything except "copper", an individual's odds of death increased by a factor of 1.003 for every 1 ug/day increase in urine copper. When controlling for everything except "alk.phos", an individual's odds of death increased by a factor of 1.0003 for every 1 U/liter increase in alkaline phosphatase. When controlling for everything except "ast", an individual's odds of death increased by a factor of 1.006 for every 1 U/ml increase in aspartate aminotransferase. When controlling for everything except "trig", an individual's odds of death increased by a factor of 1.002 for every 1 mg/dl increase in triglycerides. When controlling for everything except "platelet", an individual's odds of death decreased by a factor of 0.999 for every 1 unit increase in patelet count. When controlling for everything except "protime", an individual's odds of death increased by a factor of 2.084 for every 1 unit increase in blood clotting time. When controlling for everything except "stage 3", an individual's odds of death increased by a factor of 1.057 when they progress to stage 3 PBC. When controlling for everything except "stage 2", an individual's odds of death decreased by a factor of 0822 when they progress to stage 2 PBC. When controlling for everything except "stage 1", an individual's odds of death decreased by a factor of 0.062 when they progress to stage 1 PBC. When controlling for everything except "trt2", an individual's odds of death increased by a factor of 1.337 when treated with D-Penacillamine.
+
+## Accuracy, TPR, TNR, PPV
+TNR (specificity) was found to be 0.885. TPR (sensitivity) was found to be 0.712. FNR was found to be 0.115. FPR was found to be 0.297. PPV was found to be 0.806. Accuracy was found to be 0.815.
+
+## AUC
+The AUC score was found to be 0.887, which is cosidered to be "good".
+
+## Out of Sample Accuracy, TPR, and PPV
+The out of sample accuracy was found to be 0.786, while TPR was 0.664, and PPV was 0.775.
+
+```{R}
+#Logistic Regression
+pbcd4<-pbcd1%>%select(cols=-1,-c(18:27))
+logit<-function(p)log(odds(p))
+fit3<-glm(y~.,data=pbcd4,family="binomial")
+exp(coef(fit3))
+prob3<-predict(fit3,type="response")
+
+#Confusion Matrix
+table(predict=as.numeric(prob3>.5),truth=pbcd$y)%>%addmargins
+
+#Accuracy, TPR, TNR, PPV
+146/165
+78/111
+19/165
+33/111
+79/98
+(146+79)/276
+
+#Density plot
+pbcd2<-pbcd
+pbcd2$logit<-predict(fit3)
+pbcd2$y<-factor(pbcd2$y,levels=c("1","0"))
+ggplot(pbcd2,aes(logit, fill=y))+geom_density(alpha=.3)+
+  geom_vline(xintercept=0,lty=2)
+
+#ROCplot
+library(plotROC)
+pbcd$prob3<-predict(fit3,type="response")
+ROCplot<-ggplot(pbcd)+geom_roc(aes(d=y,m=prob3), n.cuts=0)
+calc_auc(ROCplot)
+
+#Classification Diagnostics Function
+class_diag <- function(probs,truth){
+  
+  #CONFUSION MATRIX: CALCULATE ACCURACY, TPR, TNR, PPV
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+  
+  #CALCULATE EXACT AUC
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,auc)
+}
+
+#Cross-Validation
+set.seed(1234)
+k=10
+data<-pbcd[sample(nrow(pbcd)),]
+folds<-cut(seq(1:nrow(pbcd)),breaks=k,labels=F)
+diags<-NULL
+for(i in 1:k){
+  train<-data[folds!=i,]
+  test<-data[folds==i,]
+  truth<-test$y
+  fit4<-glm(y~.,data=train,family="binomial")
+  probs<-predict(fit4,newdata = test,type="response")
+  diags<-rbind(diags,class_diag(probs,truth))
+}
+summarize_all(diags,mean)
+```
+
+# LASSO
+
+The variables retained from LASSO are all of them except "platelet" and "stagethree". The out of sample accuracy here is 0.772, which is slightly lower than that of the logistic regression.
+
+```{R}
+#Lasso
+pbcd3<-pbcd%>%mutate(stageone=ifelse(stage=="1",1,0))%>%mutate(stagetwo=ifelse(stage=="2",1,0))%>%mutate(stagethree=ifelse(stage=="3",1,0))%>%mutate(stagefour=ifelse(stage=="4",1,0))
+library(glmnet)
+y<-as.matrix(pbcd$y)
+x<-model.matrix(y~trt+age+sex+ascites+hepato+spiders+bili+chol+albumin+copper+alk.phos+ast+trig+platelet+protime+stageone+stagetwo+stagethree+stagefour,data=pbcd3)[,-1]
+cv<-cv.glmnet(x,y,family="binomial")
+lasso<-glmnet(x,y,family="binomial",lambda=cv$lambda.1se)
+coef(lasso)
+
+#Cross-Validation
+set.seed(1234)
+k=10
+data2 <- pbcd3 %>% sample_frac
+folds2 <- ntile(1:nrow(data2),n=10)
+diags2<-NULL
+for(i in 1:k){
+  train2 <- data2[folds2!=i,]
+  test2 <- data2[folds2==i,]
+  truth2 <- test2$y
+  fit5 <- glm(y~age+trt+sex+ascites+hepato+spiders+bili+chol+albumin+copper+alk.phos+ast+trig+protime+stageone+stagetwo+stagefour,data=train2,family="binomial")
+  probs5 <- predict(fit5, newdata=test2, type="response")
+  diags2<-rbind(diags2,class_diag(probs5,truth2))
+  }
+diags2%>%summarize_all(mean)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
