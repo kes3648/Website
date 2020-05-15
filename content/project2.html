@@ -1,7 +1,7 @@
 ---
 title: "Project 2: Modeling, Testing, Predicting"
 author: "Kristen Shaver (kes3648)"
-date: ""
+date: '2020-05-01'
 output:
   html_document: default
   pdf_document: default
@@ -156,7 +156,7 @@ for (i in 1:5000) {
         mean(new[new$trt == &quot;Placebo&quot;, ]$copper)
 }
 mean(rand_dist &lt; -12.975 | rand_dist &gt; 12.975)</code></pre>
-<pre><code>## [1] 0.2242</code></pre>
+<pre><code>## [1] 0.2248</code></pre>
 <pre class="r"><code>{
     hist(rand_dist, main = &quot;&quot;, ylab = &quot;&quot;)
     abline(v = -12.975, col = &quot;red&quot;)
@@ -259,9 +259,9 @@ samp_distn &lt;- replicate(5000, {
 })
 samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
 <pre><code>##   (Intercept)     trt2     sexf    age_c trt2:sexf trt2:age_c sexf:age_c
-## 1    29.78473 45.80252 30.75671 2.689921  46.83318   3.813321   2.795678
+## 1     30.6086 46.21329 31.54707 2.720451  47.36437   3.808297   2.833249
 ##   trt2:sexf:age_c
-## 1        3.944006</code></pre>
+## 1        3.934638</code></pre>
 </div>
 <div id="logistic-regression" class="section level1">
 <h1>Logistic Regression</h1>

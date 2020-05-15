@@ -1,7 +1,7 @@
 ---
 title: "Exploratory Data Analysis"
 author: "Kristen Shaver (kes3648)"
-date: ""
+date: '2020-03-16'
 output:
   html_document: default
   pdf_document: default

@@ -1,7 +1,7 @@
 ---
 title: "Project 2: Modeling, Testing, Predicting"
 author: "Kristen Shaver (kes3648)"
-date: ""
+date: '2020-05-01'
 output:
   html_document: default
   pdf_document: default
