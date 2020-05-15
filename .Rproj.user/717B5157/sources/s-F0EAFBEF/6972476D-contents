@@ -11,7 +11,7 @@ theme = "hugo-sustain"
   post = "/:year/:month/:day/:slug"
 
 [params]
-  avatar = "websitepic2.png"
+  avatar = "websitepic3.png"
   author = "Kristen Shaver"
   description = "Describe your website"
 
@@ -34,7 +34,7 @@ theme = "hugo-sustain"
   name = "Projects"
   identifier = "Projects"
   weight = 200
-  url = "/projects/"
+  url = "/projects.md/"
 [[menu.main]]
   name = "resume"
   identifier = "resume"
