@@ -1,0 +1,49 @@
+---
+title: Using Python in R Studio
+author: ''
+date: '2020-05-15'
+slug: using-python-in-r-studio
+categories: []
+tags: []
+description: ''
+---
+
+![](/blog/2020-05-15-using-python-in-r-studio_files/OIPI1VR8XSR.jpg)
+
+Want to know what Spongebob and Patrick are laughing about? Let me tell you using R and Python!
+
+```{R}
+library(reticulate)
+```
+
+Python:
+```{python}
+s="Hey Patrick, I thought of something funnier than 24"
+```
+
+R:
+```{R}
+print(py$s)
+z<-"Let me hear it"
+```
+
+Python:
+```{python}
+r.z
+y=24
+```
+
+R:
+```{R}
+py$y+1
+
+l<-"lololol"
+```
+
+Python:
+```{python}
+r.l
+```
+
+![](/blog/2020-05-15-using-python-in-r-studio_files/spongebobfunny.jpg)
+

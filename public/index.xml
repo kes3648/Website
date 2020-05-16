@@ -12,6 +12,33 @@
     
     
     <item>
+      <title>Using Python in R Part 2!</title>
+      <link>/blog/using-python-in-r-part-2/</link>
+      <pubDate>Fri, 15 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/using-python-in-r-part-2/</guid>
+      <description>Let’s find the volume of earth!
+library(reticulate)## Warning: package &amp;#39;reticulate&amp;#39; was built under R version 3.6.3We know the radius of earth is approximately 6,378 miles long.
+#Pythonr=6378We also know that the earth is (roughly) spherical in shape!
+#R4*pi*(((py$r)^3)/3)## [1] 1.086781e+12v&amp;lt;-4*pi*(((py$r)^3)/3)We have found that earth’s volume is a really, really big number! It comes out to approximately 1086781000000 cubic miles!
+Want to convert that to cubic kilometers?</description>
+    </item>
+    
+    <item>
+      <title>Using Python in R Studio</title>
+      <link>/blog/using-python-in-r-studio/</link>
+      <pubDate>Fri, 15 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/using-python-in-r-studio/</guid>
+      <description>Want to know what Spongebob and Patrick are laughing about? Let me tell you using R and Python!
+library(reticulate)## Warning: package &amp;#39;reticulate&amp;#39; was built under R version 3.6.3Python:
+s=&amp;quot;Hey Patrick, I thought of something funnier than 24&amp;quot;R:
+print(py$s)## [1] &amp;quot;Hey Patrick, I thought of something funnier than 24&amp;quot;z&amp;lt;-&amp;quot;Let me hear it&amp;quot;Python:
+r.z## &amp;#39;Let me hear it&amp;#39;y=24R:
+py$y+1## [1] 25l&amp;lt;-&amp;quot;lololol&amp;quot;Python:</description>
+    </item>
+    
+    <item>
       <title>Project 2: Modeling, Testing, Predicting</title>
       <link>/project2/</link>
       <pubDate>Fri, 01 May 2020 00:00:00 +0000</pubDate>
@@ -35,21 +62,10 @@
       <pubDate>Sun, 02 Oct 2016 22:55:05 -0400</pubDate>
       
       <guid>/projects/</guid>
-      <description>Projects Here are some projects I have recently completed:
+      <description>Projects Here are some projects I have recently completed using R Studio:
   Exploratory Data Analysis with Tidyverse Tools
   Modeling, Testing, and Classification
   </description>
-    </item>
-    
-    <item>
-      <title>Hello R Markdown</title>
-      <link>/blog/2015-07-23-r-rmarkdown/</link>
-      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/2015-07-23-r-rmarkdown/</guid>
-      <description>R MarkdownThis is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
-You can embed an R code chunk like this:
-summary(cars)## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
     </item>
     
   </channel>

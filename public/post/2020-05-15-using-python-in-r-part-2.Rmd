@@ -1,0 +1,11 @@
+---
+title: Using Python in R Part 2
+author: ''
+date: '2020-05-15'
+slug: using-python-in-r-part-2
+categories: []
+tags: []
+description: ''
+---
+
+![](/post/2020-05-15-using-python-in-r-part-2_files/earth-spinning-rotating-animation-31.gif)

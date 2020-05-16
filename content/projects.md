@@ -9,7 +9,7 @@ title: Projects
 ---
 ## Projects 
 
-Here are some projects I have recently completed:
+Here are some projects I have recently completed using R Studio:
 
 - [Exploratory Data Analysis with Tidyverse Tools](/project1/)
 

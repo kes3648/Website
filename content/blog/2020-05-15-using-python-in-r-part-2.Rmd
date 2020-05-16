@@ -1,0 +1,41 @@
+---
+title: Using Python in R Part 2!
+author: ''
+date: '2020-05-15'
+slug: using-python-in-r-part-2
+categories: []
+tags: []
+description: ''
+---
+
+![](/blog/2020-05-15-using-python-in-r-part-2_files/earth-spinning-rotating-animation-31.gif)
+
+Let's find the volume of earth!
+
+```{R}
+library(reticulate)
+```
+
+We know the radius of earth is approximately 6,378 miles long.
+```{python}
+#Python
+r=6378
+```
+
+We also know that the earth is (roughly) spherical in shape!
+```{R}
+#R
+4*pi*(((py$r)^3)/3)
+v<-4*pi*(((py$r)^3)/3)
+```
+
+We have found that earth's volume is a really, really big number! It comes out to approximately 1086781000000 cubic miles!
+
+Want to convert that to cubic kilometers? There is 4.168 cubic kilometers for ever cubic mile.
+
+```{python}
+#Python
+r.v*4.168
+```
+
+The eart's volume in cubic kilometers is 4529704427318.763!
